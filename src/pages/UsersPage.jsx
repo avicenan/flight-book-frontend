@@ -108,7 +108,7 @@ const UsersPage = () => {
   }
 
   return (
-    <div className="p-8 pt-20">
+    <div className="p-8 pt-20 max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Users</h1>
         <button onClick={() => setIsModalOpen(true)} className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">

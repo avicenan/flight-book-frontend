@@ -13,7 +13,6 @@ const BookingsPage = () => {
       try {
         const response = await bookingsApiService.getAll();
         if (response.data && response.data.data) {
-          // Fetch user and flight details for each booking
           const bookingsWithDetails = await Promise.all(
             response.data.data.map(async (booking) => {
               try {
@@ -92,59 +91,115 @@ const BookingsPage = () => {
 
   if (loading) {
     return (
-      <div className="p-8 pt-20 flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      <div className="min-h-screen bg-gray-50 p-8 pt-20">
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="p-8 pt-20">
-        <div className="text-red-500 text-center">{error}</div>
+      <div className="min-h-screen bg-gray-50 p-8 pt-20">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">{error}</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-8 pt-20 flex flex-col gap-4">
-      <h1 className="text-2xl font-bold">Bookings</h1>
+    <div className="min-h-screen bg-gray-50 p-8 pt-20">
+      <div className="max-w-4xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-gray-800">Bookings</h1>
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search bookings..."
+              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-64 bg-white"
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <svg className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+            </svg>
+          </div>
+        </div>
 
-      <div className="mb-2">
-        <input type="text" placeholder="Search by name or flight..." className="border border-gray-300 p-4 rounded-full w-full" onChange={(e) => setSearch(e.target.value)} />
-      </div>
+        {!loading && !error && filteredBookings.length === 0 && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
+            <svg className="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+            <p className="mt-4 text-gray-500 text-lg">No bookings found</p>
+          </div>
+        )}
 
-      {!loading && !error && filteredBookings.length === 0 && <div className="text-center text-gray-500">No bookings found</div>}
+        <div className="space-y-4">
+          {filteredBookings.map((booking) => (
+            <Link to={`/bookings/${booking.id}`} key={booking.id} className="block">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
+                <div className="flex flex-col md:flex-row justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-4">
+                      <svg className="h-6 w-6 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                      <h2 className="text-xl font-semibold text-gray-800">{booking.user?.name || "Unknown User"}</h2>
+                    </div>
 
-      <div className="grid gap-4">
-        {filteredBookings.map((booking) => (
-          <Link to={`/bookings/${booking.id}`} key={booking.id}>
-            <div className="border border-gray-400 p-4 rounded-lg shadow hover:shadow-lg transition cursor-pointer">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="font-bold text-lg">{booking.user?.name || "Unknown User"}</p>
-                  <p className="text-gray-600">
-                    Flight: {booking.flight?.flight_code || "N/A"} ({booking.flight?.airline_name || "N/A"})
-                  </p>
-                  <p className="text-gray-600">
-                    Route: {booking.flight?.from || "N/A"} → {booking.flight?.to || "N/A"}
-                  </p>
-                  <p className="text-gray-600">Departure Time: {formatDateTime(booking.flight?.departure_time)}</p>
-                  <p className="text-gray-600">Arrival Time: {formatDateTime(booking.flight?.arrival_time)}</p>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-500">Flight:</span>
+                          <span className="font-medium">{booking.flight?.flight_code || "N/A"}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-500">Airline:</span>
+                          <span className="font-medium">{booking.flight?.airline_name || "N/A"}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-500">Route:</span>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{booking.flight?.from || "N/A"}</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                            </svg>
+                            <span className="font-medium">{booking.flight?.to || "N/A"}</span>
+                          </div>
+                        </div>
+                      </div>
 
-                  <div className="flex gap-2">
-                    <p className="text-sm mt-2">Tickets: {booking.ticket_quantity || 0}</p>
-                    <p className="text-sm mt-2">Total Price: Rp {(booking.ticket_quantity * booking.flight?.price).toLocaleString("id-ID") || 0}</p>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-500">Departure:</span>
+                          <span className="font-medium">{formatDateTime(booking.flight?.departure_time)}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-500">Arrival:</span>
+                          <span className="font-medium">{formatDateTime(booking.flight?.arrival_time)}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-500">Tickets:</span>
+                          <span className="font-medium">{booking.ticket_quantity || 0}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 pt-4 border-t flex flex-wrap items-center justify-between gap-4">
+                      <div className="flex items-center gap-4">
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(booking.status)}`}>{booking.status?.charAt(0).toUpperCase() + booking.status?.slice(1) || "Unknown"}</span>
+                        <span className="text-sm text-gray-500">Ordered: {formatDateTime(booking.created_at)}</span>
+                      </div>
+                      <div className="font-bold text-lg text-green-600">Rp {(booking.ticket_quantity * booking.flight?.price)?.toLocaleString("id-ID") || 0}</div>
+                    </div>
                   </div>
                 </div>
-                <div className="flex flex-col items-end">
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(booking.status)}`}>{booking.status?.charAt(0).toUpperCase() + booking.status?.slice(1) || "Unknown"}</span>
-                  <p className="text-sm text-gray-500 mt-2">Ordered at: {formatDateTime(booking.created_at)}</p>
-                </div>
               </div>
-            </div>
-          </Link>
-        ))}
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   );

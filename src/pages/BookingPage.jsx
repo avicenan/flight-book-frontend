@@ -75,7 +75,6 @@ const BookingPage = () => {
     const bookingData = {
       user_id: userId,
       flight_id: flightId,
-      status: "pending",
       ticket_quantity: Number(ticketQuantity),
     };
 
