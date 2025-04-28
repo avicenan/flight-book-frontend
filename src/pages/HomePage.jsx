@@ -27,7 +27,12 @@ function HomePage() {
   const filteredFlights = [];
   if (flights.length > 0) {
     flights.forEach((flight) => {
-      if (flight.airline_name.toLowerCase().includes(search.toLowerCase()) || flight.from.toLowerCase().includes(search.toLowerCase()) || flight.to.toLowerCase().includes(search.toLowerCase())) {
+      if (
+        flight.airline_name.toLowerCase().includes(search.toLowerCase()) ||
+        flight.from.toLowerCase().includes(search.toLowerCase()) ||
+        flight.to.toLowerCase().includes(search.toLowerCase()) ||
+        flight.departure_time.toLowerCase().includes(search.toLowerCase())
+      ) {
         filteredFlights.push(flight);
       }
     });
@@ -73,7 +78,8 @@ function HomePage() {
                 <p className="mt-2">
                   Route: {flight.from} → {flight.to}
                 </p>
-                <p className="font-bold mt-2">Price: Rp {flight.price ? flight.price.toLocaleString() : "N/A"}</p>
+                {/* <p className="font-bold mt-2">Price: Rp {flight.price ? flight.price.toLocaleString() : "N/A"}</p> */}
+                <p className="font-bold mt-2">Departure Time: {flight.departure_time}</p>
               </div>
 
               <Link to={`/book/${flight.id}`}>

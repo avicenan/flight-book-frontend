@@ -1,38 +1,59 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { flightsApiService } from "../services/api";
+import { flightsApiService, bookingsApiService, usersApiService } from "../services/api";
 
 const BookingPage = () => {
   const { flightId } = useParams();
   const [flight, setFlight] = useState(null);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [passengerName, setPassengerName] = useState("");
-  const [passengerEmail, setPassengerEmail] = useState("");
+  const [userId, setUserId] = useState("");
+  const [ticketQuantity, setTicketQuantity] = useState(1);
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Fetch flight details
     flightsApiService
       .getById(flightId)
       .then((res) => {
         if (!res.data) throw new Error("Flight not found");
         setFlight(res.data.data);
-        setLoading(false);
       })
       .catch((err) => {
         setError(err.message);
+      });
+
+    // Fetch users
+    usersApiService
+      .getAll()
+      .then((res) => {
+        if (!res.data) throw new Error("Failed to fetch users");
+        setUsers(res.data.data);
+      })
+      .catch((err) => {
+        setError(err.message);
+      })
+      .finally(() => {
         setLoading(false);
       });
   }, [flightId]);
 
   const handleBooking = () => {
-    flightsApiService
-      .createBooking({
-        passengerName,
-        passengerEmail,
-        flightId: flight.id,
-        flightInfo: `${flight.from} ➔ ${flight.to} (${flight.airline_name})`,
-      })
+    if (!userId) {
+      alert("Please select a user");
+      return;
+    }
+
+    const bookingData = {
+      user_id: userId,
+      flight_id: flightId,
+      status: "pending",
+      ticket_quantity: Number(ticketQuantity),
+    };
+
+    bookingsApiService
+      .create(bookingData)
       .then(() => {
         alert("Booking successful!");
         navigate("/bookings");
@@ -42,7 +63,7 @@ const BookingPage = () => {
       });
   };
 
-  if (loading) return <p>Loading flight details...</p>;
+  if (loading) return <p>Loading...</p>;
   if (error) return <p className="text-red-600">{error}</p>;
   if (!flight) return <p className="text-red-600">Flight not found</p>;
 
@@ -60,13 +81,21 @@ const BookingPage = () => {
         <p className="mb-2">
           {flight.from} ➔ {flight.to}
         </p>
-        <p className="text-green-600 font-semibold">Rp{flight.price?.toLocaleString() || "N/A"}</p>
+        <p className="text-green-600 font-semibold">Departure: {flight.departure_time.toLocaleString()}</p>
       </div>
 
       <div className="mt-4 flex flex-col gap-2">
-        <input className="border p-2 rounded" type="text" placeholder="Passenger Name" value={passengerName} onChange={(e) => setPassengerName(e.target.value)} />
-        <input className="border p-2 rounded" type="email" placeholder="Passenger Email" value={passengerEmail} onChange={(e) => setPassengerEmail(e.target.value)} />
-        <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600" onClick={handleBooking}>
+        <select className="border p-2 rounded" value={userId} onChange={(e) => setUserId(e.target.value)} required>
+          <option value="">Select a user</option>
+          {users.map((user) => (
+            <option key={user.id} value={user.id}>
+              {user.name}
+            </option>
+          ))}
+        </select>
+
+        <input className="border p-2 rounded" type="number" placeholder="Number of Tickets" value={ticketQuantity} onChange={(e) => setTicketQuantity(e.target.value)} min="1" />
+        <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 hover:cursor-pointer" onClick={handleBooking}>
           Confirm Booking
         </button>
       </div>

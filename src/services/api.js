@@ -5,21 +5,70 @@ const usersApi = axios.create({
   baseURL: "http://localhost:8001/api",
   headers: {
     "Content-Type": "application/json",
+    Accept: "application/json",
   },
+  withCredentials: false,
 });
 
 const flightsApi = axios.create({
   baseURL: "http://localhost:8002/api",
   headers: {
     "Content-Type": "application/json",
+    Accept: "application/json",
   },
+  withCredentials: false,
 });
 
 const bookingsApi = axios.create({
   baseURL: "http://localhost:8003/api",
   headers: {
     "Content-Type": "application/json",
+    Accept: "application/json",
   },
+  withCredentials: false,
+});
+
+// Add request interceptor for debugging
+const addRequestInterceptor = (api) => {
+  api.interceptors.request.use(
+    (config) => {
+      console.log("Request Config:", {
+        url: config.url,
+        method: config.method,
+        headers: config.headers,
+        data: config.data,
+      });
+      return config;
+    },
+    (error) => {
+      console.error("Request Error:", error);
+      return Promise.reject(error);
+    }
+  );
+};
+
+// Add response interceptor for debugging
+const addResponseInterceptor = (api) => {
+  api.interceptors.response.use(
+    (response) => {
+      console.log("Response:", response);
+      return response;
+    },
+    (error) => {
+      console.error("Response Error:", {
+        message: error.message,
+        response: error.response,
+        request: error.request,
+      });
+      return Promise.reject(error);
+    }
+  );
+};
+
+// Add interceptors to all APIs
+[usersApi, flightsApi, bookingsApi].forEach((api) => {
+  addRequestInterceptor(api);
+  addResponseInterceptor(api);
 });
 
 // Users API

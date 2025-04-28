@@ -28,11 +28,36 @@ function AddFlightPage() {
     setError(null);
 
     try {
-      await flightsApiService.create(formData);
-      alert("Flight added successfully!");
-      navigate("/");
+      // Format the datetime to MySQL format (YYYY-MM-DD HH:mm:ss)
+      const formattedData = {
+        ...formData,
+        departure_time: new Date(formData.departure_time).toISOString().slice(0, 19).replace("T", " "),
+      };
+
+      console.log("Submitting form data:", formattedData);
+
+      const response = await flightsApiService.create(formattedData);
+      console.log("API Response:", response);
+
+      if (response.status === 200 || response.status === 201) {
+        alert("Flight added successfully!");
+        navigate("/");
+      } else {
+        throw new Error(`Unexpected response status: ${response.status}`);
+      }
     } catch (err) {
-      setError(err.message || "Failed to add flight");
+      console.error("Error creating flight:", err);
+      if (err.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        setError(err.response.data?.message || "Failed to add flight. Please try again.");
+      } else if (err.request) {
+        // The request was made but no response was received
+        setError("No response received from server. Please check your connection.");
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        setError(err.message || "An unexpected error occurred.");
+      }
     } finally {
       setLoading(false);
     }

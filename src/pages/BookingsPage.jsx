@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { bookingsApiService } from "../services/api";
+import { bookingsApiService, usersApiService, flightsApiService } from "../services/api";
 
 const BookingsPage = () => {
   const [bookings, setBookings] = useState([]);
@@ -12,11 +12,36 @@ const BookingsPage = () => {
     const fetchBookings = async () => {
       try {
         const response = await bookingsApiService.getAll();
-        setBookings(Array.isArray(response.data) ? response.data : []);
+        if (response.data && response.data.data) {
+          // Fetch user and flight details for each booking
+          const bookingsWithDetails = await Promise.all(
+            response.data.data.map(async (booking) => {
+              try {
+                const [userResponse, flightResponse] = await Promise.all([usersApiService.getById(booking.user_id), flightsApiService.getById(booking.flight_id)]);
+
+                return {
+                  ...booking,
+                  user: userResponse.data?.data || null,
+                  flight: flightResponse.data?.data || null,
+                };
+              } catch (err) {
+                console.error(`Error fetching details for booking ${booking.id}:`, err);
+                return {
+                  ...booking,
+                  user: null,
+                  flight: null,
+                };
+              }
+            })
+          );
+
+          setBookings(bookingsWithDetails);
+        } else {
+          throw new Error("Invalid response format");
+        }
         setLoading(false);
-        console.log(response.data);
       } catch (err) {
-        setError("Failed to fetch bookings");
+        setError(err.message || "Failed to fetch bookings");
         setLoading(false);
         console.error(err);
       }
@@ -26,24 +51,34 @@ const BookingsPage = () => {
   }, []);
 
   const filteredBookings = bookings.filter((booking) => {
-    const userName = booking.user?.name || "";
-    const flightInfo = `${booking.flight?.flight_code || ""} ${booking.flight?.from || ""} ${booking.flight?.to || ""}`;
-    return userName.toLowerCase().includes(search.toLowerCase()) || flightInfo.toLowerCase().includes(search.toLowerCase());
+    const searchTerm = search.toLowerCase();
+    const userName = booking.user?.name?.toLowerCase() || "";
+    const flightCode = booking.flight?.flight_code?.toLowerCase() || "";
+    const from = booking.flight?.from?.toLowerCase() || "";
+    const to = booking.flight?.to?.toLowerCase() || "";
+
+    return userName.includes(searchTerm) || flightCode.includes(searchTerm) || from.includes(searchTerm) || to.includes(searchTerm);
   });
 
   const formatDateTime = (dateTimeString) => {
-    const date = new Date(dateTimeString);
-    return date.toLocaleString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    if (!dateTimeString) return "N/A";
+    try {
+      const date = new Date(dateTimeString);
+      return date.toLocaleString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "Invalid date";
+    }
   };
 
   const getStatusColor = (status) => {
-    switch (status) {
+    switch (status?.toLowerCase()) {
       case "confirmed":
         return "bg-green-100 text-green-800";
       case "pending":
@@ -55,40 +90,57 @@ const BookingsPage = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="p-8 pt-20 flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-8 pt-20">
+        <div className="text-red-500 text-center">{error}</div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-8 pt-20 flex flex-col gap-4">
       <h1 className="text-2xl font-bold">Bookings</h1>
+
       <div className="mb-2">
         <input type="text" placeholder="Search by name or flight..." className="border border-gray-300 p-4 rounded-full w-full" onChange={(e) => setSearch(e.target.value)} />
       </div>
-      {filteredBookings.length === 0 && !loading && <p>No bookings found.</p>}
-      {loading && (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-        </div>
-      )}
-      {error && <div className="text-red-500 text-center">{error}</div>}
-      {filteredBookings.length > 0 &&
-        filteredBookings.map((booking) => (
+
+      {!loading && !error && filteredBookings.length === 0 && <div className="text-center text-gray-500">No bookings found</div>}
+
+      <div className="grid gap-4">
+        {filteredBookings.map((booking) => (
           <Link to={`/bookings/${booking.id}`} key={booking.id}>
             <div className="border border-gray-400 p-4 rounded-lg shadow hover:shadow-lg transition cursor-pointer">
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="font-bold">{booking.user?.name}</p>
-                  <p>{booking.user?.email}</p>
+                  <p className="font-bold text-lg">{booking.user?.name || "Unknown User"}</p>
                   <p className="text-gray-600">
-                    {booking.flight?.flight_code}: {booking.flight?.from} → {booking.flight?.to} ({booking.flight?.airline_name})
+                    Flight: {booking.flight?.flight_code || "N/A"} ({booking.flight?.airline_name || "N/A"})
                   </p>
-                  <p className="text-sm mt-2">Tickets: {booking.ticket_quantity}</p>
+                  <p className="text-gray-600">
+                    Route: {booking.flight?.from || "N/A"} → {booking.flight?.to || "N/A"}
+                  </p>
+                  <p className="text-gray-600">Departure: {formatDateTime(booking.flight?.departure_time)}</p>
+                  <p className="text-sm mt-2">Tickets: {booking.ticket_quantity || 0}</p>
                 </div>
                 <div className="flex flex-col items-end">
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(booking.status)}`}>{booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}</span>
-                  <p className="text-sm text-gray-500 mt-2">Ordered: {formatDateTime(booking.orderTime)}</p>
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(booking.status)}`}>{booking.status?.charAt(0).toUpperCase() + booking.status?.slice(1) || "Unknown"}</span>
+                  <p className="text-sm text-gray-500 mt-2">Created: {formatDateTime(booking.created_at)}</p>
                 </div>
               </div>
             </div>
           </Link>
         ))}
+      </div>
     </div>
   );
 };
