@@ -55,6 +55,19 @@ function HomePage() {
     }
   };
 
+  const handleDelete = async (flightId) => {
+    if (window.confirm("Are you sure you want to delete this flight?")) {
+      try {
+        await flightsApiService.delete(flightId);
+        setFlights(flights.filter((flight) => flight.id !== flightId));
+        console.log("Flight deleted successfully");
+      } catch (error) {
+        console.error("Failed to delete flight:", error);
+        setError("Failed to delete flight. Please try again.");
+      }
+    }
+  };
+
   return (
     <div className="p-8 pt-20 flex flex-col min-h-screen text-left gap-4">
       <div className="jumbotron relative">
@@ -96,15 +109,18 @@ function HomePage() {
                   Route: {flight.from} → {flight.to}
                 </p>
                 <p className="font-bold mt-2">Price: Rp {flight.price ? flight.price.toLocaleString() : "N/A"}</p>
-                <div className="flex gap-4">
-                  <p className="font-bold mt-2">Departure Time: {formatDateTime(flight.departure_time)}</p>
-                  <p className="font-bold mt-2">Arrival Time: {formatDateTime(flight.arrival_time)}</p>
-                </div>
+                <p className="font-bold mt-2">Departure Time: {formatDateTime(flight.departure_time)}</p>
+                <p className="font-bold mt-2">Arrival Time: {formatDateTime(flight.arrival_time)}</p>
               </div>
 
-              <Link to={`/book/${flight.id}`}>
-                <button className="mt-4 bg-blue-800 hover:bg-blue-600 hover:cursor-pointer text-white py-2 px-4 rounded">Book Now</button>
-              </Link>
+              <div className="flex gap-2">
+                <button onClick={() => handleDelete(flight.id)} className="mt-4 border border-red-500 text-red-500 hover:bg-red-600 hover:cursor-pointer hover:text-white py-2 px-4 rounded">
+                  Delete
+                </button>
+                <Link to={`/book/${flight.id}`}>
+                  <button className="mt-4 bg-blue-800 hover:bg-blue-600 hover:cursor-pointer text-white py-2 px-4 rounded">Book Now</button>
+                </Link>
+              </div>
             </div>
           ))}
         </div>

@@ -76,10 +76,12 @@ function BookingDetailPage() {
   return (
     <div className="p-8 pt-20">
       <div className="">
-        <button className="mb-2 bg-white border border-gray-300 text-black px-4 py-2 rounded hover:bg-gray-200" onClick={() => navigate("/bookings")}>
-          Back
-        </button>
-        <h1 className="text-2xl font-bold mb-6">Booking Details</h1>
+        <div className="flex justify-between">
+          <h1 className="text-2xl font-bold mb-6">Booking Details</h1>
+          <button className="mb-2 bg-gray-200 border border-gray-300 text-black px-4 py-2 rounded hover:bg-gray-300 hover:cursor-pointer" onClick={() => navigate("/bookings")}>
+            Back
+          </button>
+        </div>
         <div className="bg-white rounded-lg shadow-lg p-6 border border-gray-400">
           <div className="mb-6">
             <h2 className="text-xl font-semibold mb-2">Passenger Information</h2>
