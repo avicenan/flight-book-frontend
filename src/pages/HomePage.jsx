@@ -78,7 +78,7 @@ function HomePage() {
                 <p className="mt-2">
                   Route: {flight.from} → {flight.to}
                 </p>
-                {/* <p className="font-bold mt-2">Price: Rp {flight.price ? flight.price.toLocaleString() : "N/A"}</p> */}
+                <p className="font-bold mt-2">Price: Rp {flight.price ? flight.price.toLocaleString() : "N/A"}</p>
                 <p className="font-bold mt-2">Departure Time: {flight.departure_time}</p>
               </div>
 
