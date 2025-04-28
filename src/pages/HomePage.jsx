@@ -1,0 +1,83 @@
+import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { flightsApiService } from "../services/api";
+
+function HomePage() {
+  const { pathname } = useLocation();
+  const [search, setSearch] = useState("");
+  const [flights, setFlights] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    flightsApiService
+      .getAll()
+      .then((res) => {
+        if (!res.data) throw new Error("Failed to fetch flights");
+        setFlights(res.data.data);
+        setLoading(false);
+        console.log(res.data);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
+
+  const filteredFlights = [];
+  if (flights.length > 0) {
+    flights.forEach((flight) => {
+      if (flight.airline_name.toLowerCase().includes(search.toLowerCase()) || flight.from.toLowerCase().includes(search.toLowerCase()) || flight.to.toLowerCase().includes(search.toLowerCase())) {
+        filteredFlights.push(flight);
+      }
+    });
+  }
+
+  return (
+    <div className="p-8 pt-20 flex flex-col min-h-screen text-left gap-4">
+      <div className="jumbotron relative">
+        <img
+          src="https://plus.unsplash.com/premium_photo-1679830513869-cd3648acb1db?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8dHJhdmVsfGVufDB8fDB8fHww"
+          alt=""
+          className="h-60 rounded-2xl w-full object-cover"
+        />
+        <p className="absolute top-1 p-4 font-bold left-1 text-3xl">Flight Ticket Point of Sales</p>
+      </div>
+
+      <h1 className={`text-2xl font-bold`}>Available Flights</h1>
+
+      {/* search box */}
+      <div className="">
+        <input type="text" placeholder="Search flights..." className="border border-gray-300 p-4 rounded-full w-full" onChange={(e) => setSearch(e.target.value)} />
+      </div>
+
+      {loading ? (
+        <div>Loading flights...</div>
+      ) : error ? (
+        <div className="text-red-500">Error: {error}</div>
+      ) : (
+        <div className="flex flex-col md:grid-cols-2 lg:grid-cols-3 gap-4 flex-1">
+          {filteredFlights.map((flight) => (
+            <div key={flight.id} className="border border-gray-400 p-4 rounded-lg shadow hover:shadow-lg transition flex justify-between items-end">
+              <div className="">
+                <h2 className="text-xl font-semibold">
+                  {flight.airline_name} ({flight.flight_code})
+                </h2>
+                <p className="mt-2">
+                  Route: {flight.from} → {flight.to}
+                </p>
+                <p className="font-bold mt-2">Price: Rp {flight.price ? flight.price.toLocaleString() : "N/A"}</p>
+              </div>
+
+              <Link to={`/book/${flight.id}`}>
+                <button className="mt-4 bg-blue-800 hover:bg-blue-600 hover:cursor-pointer text-white py-2 px-4 rounded">Book Now</button>
+              </Link>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default HomePage;
