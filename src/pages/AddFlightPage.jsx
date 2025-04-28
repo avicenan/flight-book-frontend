@@ -10,6 +10,7 @@ function AddFlightPage() {
     flight_code: "",
     airline_name: "",
     departure_time: "",
+    arrival_time: "",
     from: "",
     to: "",
   });
@@ -32,6 +33,7 @@ function AddFlightPage() {
       const formattedData = {
         ...formData,
         departure_time: new Date(formData.departure_time).toISOString().slice(0, 19).replace("T", " "),
+        arrival_time: formData.arrival_time ? new Date(formData.arrival_time).toISOString().slice(0, 19).replace("T", " ") : null,
       };
 
       console.log("Submitting form data:", formattedData);
@@ -99,6 +101,11 @@ function AddFlightPage() {
           <div className="flex flex-col gap-2">
             <label className="font-semibold">Departure Time</label>
             <input type="datetime-local" name="departure_time" value={formData.departure_time} onChange={handleChange} className="border p-2 rounded" required />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="font-semibold">Arrival Time</label>
+            <input type="datetime-local" name="arrival_time" value={formData.arrival_time} onChange={handleChange} className="border p-2 rounded" />
           </div>
         </div>
 

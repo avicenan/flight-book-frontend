@@ -81,7 +81,8 @@ const BookingPage = () => {
         <p className="mb-2">
           {flight.from} ➔ {flight.to}
         </p>
-        <p className="text-green-600 font-semibold mb-3">Departure: {flight.departure_time.toLocaleString()}</p>
+        <p className="text-green-600 font-semibold mb-3">Departure: {formatDateTime(flight.departure_time)}</p>
+        {flight.arrival_time && <p className="text-green-600 font-semibold mb-3">Arrival: {formatDateTime(flight.arrival_time)}</p>}
         <p className="text-lg font-semibold">Price: {flight.price ? `Rp${flight.price.toLocaleString()}` : "N/A"}</p>
       </div>
 
