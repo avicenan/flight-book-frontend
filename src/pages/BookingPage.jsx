@@ -10,6 +10,7 @@ const BookingPage = () => {
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState("");
   const [ticketQuantity, setTicketQuantity] = useState(1);
+  const [totalPrice, setTotalPrice] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -19,6 +20,7 @@ const BookingPage = () => {
       .then((res) => {
         if (!res.data) throw new Error("Flight not found");
         setFlight(res.data.data);
+        setTotalPrice(res.data.data.price * ticketQuantity);
       })
       .catch((err) => {
         setError(err.message);
@@ -38,6 +40,14 @@ const BookingPage = () => {
         setLoading(false);
       });
   }, [flightId]);
+
+  const handleQuantityChange = (e) => {
+    const newQuantity = parseInt(e.target.value);
+    setTicketQuantity(newQuantity);
+    if (flight) {
+      setTotalPrice(flight.price * newQuantity);
+    }
+  };
 
   const formatDateTime = (dateTimeString) => {
     if (!dateTimeString) return "N/A";
@@ -100,7 +110,7 @@ const BookingPage = () => {
         </p>
         <p className="text-green-600 font-semibold mb-3">Departure Time: {formatDateTime(flight.departure_time)}</p>
         {flight.arrival_time && <p className="text-green-600 font-semibold mb-3">Arrival Time: {formatDateTime(flight.arrival_time)}</p>}
-        <p className="text-lg font-semibold">Price: {flight.price ? `Rp${flight.price.toLocaleString()}` : "N/A"}</p>
+        <p className="text-lg font-semibold">Price per ticket: {flight.price ? `Rp${flight.price.toLocaleString()}` : "N/A"}</p>
       </div>
 
       <div className="mt-4 flex flex-col gap-2">
@@ -113,7 +123,8 @@ const BookingPage = () => {
           ))}
         </select>
 
-        <input className="border p-2 rounded" type="number" placeholder="Number of Tickets" value={ticketQuantity} onChange={(e) => setTicketQuantity(e.target.value)} min="1" />
+        <input className="border p-2 rounded" type="number" placeholder="Number of Tickets" value={ticketQuantity} onChange={handleQuantityChange} min="1" />
+        <div className="text-lg font-semibold">Total Price: Rp{totalPrice.toLocaleString()}</div>
         <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 hover:cursor-pointer" onClick={handleBooking}>
           Confirm Booking
         </button>
