@@ -67,7 +67,7 @@ function AddFlightPage() {
   };
 
   return (
-    <div className="p-8 pt-20 flex flex-col gap-4">
+    <div className="p-8 pt-20 flex flex-col gap-4 max-w-4xl mx-auto">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Add New Flight</h1>
         <button className="bg-gray-200 hover:bg-gray-300 text-black px-4 py-2 rounded" onClick={() => navigate("/")}>
