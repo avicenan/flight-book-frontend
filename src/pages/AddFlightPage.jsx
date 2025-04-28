@@ -11,6 +11,7 @@ function AddFlightPage() {
     airline_name: "",
     departure_time: "",
     arrival_time: "",
+    price: "",
     from: "",
     to: "",
   });
@@ -106,6 +107,11 @@ function AddFlightPage() {
           <div className="flex flex-col gap-2">
             <label className="font-semibold">Arrival Time</label>
             <input type="datetime-local" name="arrival_time" value={formData.arrival_time} onChange={handleChange} className="border p-2 rounded" />
+          </div>
+
+          <div className="flex flex-col col-span-2 gap-2">
+            <label className="font-semibold">Price</label>
+            <input type="number" name="price" value={formData.price} onChange={handleChange} className="border p-2 rounded" required placeholder="e.g., 1000" />
           </div>
         </div>
 
