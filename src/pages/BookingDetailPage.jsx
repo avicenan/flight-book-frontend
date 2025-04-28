@@ -114,13 +114,13 @@ function BookingDetailPage() {
                 <span className="font-medium">Departure Time:</span> {formatDateTime(flight.arrival_time)}
               </p>
               <p>
-                <span className="font-medium">Price:</span> Rp {flight.price ? flight.price?.toLocaleString() : 0}
+                <span className="font-medium">Price:</span> Rp {flight.price ? flight.price?.toLocaleString("id-ID") : 0}
               </p>
               <p>
                 <span className="font-medium">Tickets:</span> {booking.ticket_quantity}
               </p>
               <p>
-                <span className="font-medium">Total Price:</span> Rp {(flight.price * booking.ticket_quantity)?.toLocaleString()}
+                <span className="font-medium">Total Price:</span> Rp {(flight.price * booking.ticket_quantity)?.toLocaleString("id-ID")}
               </p>
             </div>
           </div>
