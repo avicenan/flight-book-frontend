@@ -64,7 +64,7 @@ const BookingsPage = () => {
     if (!dateTimeString) return "N/A";
     try {
       const date = new Date(dateTimeString);
-      return date.toLocaleString("en-US", {
+      return date.toLocaleString("id-ID", {
         year: "numeric",
         month: "short",
         day: "numeric",
@@ -129,8 +129,10 @@ const BookingsPage = () => {
                   <p className="text-gray-600">
                     Route: {booking.flight?.from || "N/A"} → {booking.flight?.to || "N/A"}
                   </p>
-                  <p className="text-gray-600">Departure Time: {formatDateTime(booking.flight?.departure_time)}</p>
-                  <p className="text-gray-600">Arrival Time: {formatDateTime(booking.flight?.arrival_time)}</p>
+                  <div className="flex gap-4">
+                    <p className="text-gray-600">Departure Time: {formatDateTime(booking.flight?.departure_time)}</p>
+                    <p className="text-gray-600">Arrival Time: {formatDateTime(booking.flight?.arrival_time)}</p>
+                  </div>
                   <div className="flex gap-2">
                     <p className="text-sm mt-2">Tickets: {booking.ticket_quantity || 0}</p>
                     <p className="text-sm mt-2">Total Price: Rp {booking.ticket_quantity * booking.flight?.price || 0}</p>
@@ -138,7 +140,7 @@ const BookingsPage = () => {
                 </div>
                 <div className="flex flex-col items-end">
                   <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(booking.status)}`}>{booking.status?.charAt(0).toUpperCase() + booking.status?.slice(1) || "Unknown"}</span>
-                  <p className="text-sm text-gray-500 mt-2">Created: {formatDateTime(booking.created_at)}</p>
+                  <p className="text-sm text-gray-500 mt-2">Ordered at: {formatDateTime(booking.created_at)}</p>
                 </div>
               </div>
             </div>

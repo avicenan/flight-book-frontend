@@ -42,7 +42,7 @@ function HomePage() {
     if (!dateTimeString) return "N/A";
     try {
       const date = new Date(dateTimeString);
-      return date.toLocaleString("en-US", {
+      return date.toLocaleString("id-ID", {
         year: "numeric",
         month: "short",
         day: "numeric",
