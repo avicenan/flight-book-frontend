@@ -55,33 +55,20 @@ const BookingsPage = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="p-8 pt-20">
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-8 pt-20">
-        <div className="text-red-500 text-center">{error}</div>
-      </div>
-    );
-  }
-
   return (
     <div className="p-8 pt-20 flex flex-col gap-4">
       <h1 className="text-2xl font-bold">Bookings</h1>
       <div className="mb-2">
         <input type="text" placeholder="Search by name or flight..." className="border border-gray-300 p-4 rounded-full w-full" onChange={(e) => setSearch(e.target.value)} />
       </div>
-      {filteredBookings.length === 0 ? (
-        <p>No bookings found.</p>
-      ) : (
+      {filteredBookings.length === 0 && !loading && <p>No bookings found.</p>}
+      {loading && (
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        </div>
+      )}
+      {error && <div className="text-red-500 text-center">{error}</div>}
+      {filteredBookings.length > 0 &&
         filteredBookings.map((booking) => (
           <Link to={`/bookings/${booking.id}`} key={booking.id}>
             <div className="border border-gray-400 p-4 rounded-lg shadow hover:shadow-lg transition cursor-pointer">
@@ -101,8 +88,7 @@ const BookingsPage = () => {
               </div>
             </div>
           </Link>
-        ))
-      )}
+        ))}
     </div>
   );
 };

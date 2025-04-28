@@ -5,6 +5,7 @@ import BookingsPage from "./pages/BookingsPage";
 import UsersPage from "./pages/UsersPage";
 import BookingDetailPage from "./pages/BookingDetailPage";
 import Navbar from "./components/Navbar";
+import AddFlightPage from "./pages/AddFlightPage";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/bookings" element={<BookingsPage />} />
         <Route path="/bookings/:bookingId" element={<BookingDetailPage />} />
         <Route path="/users" element={<UsersPage />} />
+        <Route path="/add-flight" element={<AddFlightPage />} />
       </Routes>
     </Router>
   );

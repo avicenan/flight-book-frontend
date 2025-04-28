@@ -1,25 +1,49 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { flights, bookings } from "../data/dummy";
+import { flightsApiService } from "../services/api";
 
 const BookingPage = () => {
   const { flightId } = useParams();
-  const flight = flights.find((f) => f.id === parseInt(flightId));
+  const [flight, setFlight] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [passengerName, setPassengerName] = useState("");
   const [passengerEmail, setPassengerEmail] = useState("");
   const navigate = useNavigate();
 
+  useEffect(() => {
+    flightsApiService
+      .getById(flightId)
+      .then((res) => {
+        if (!res.data) throw new Error("Flight not found");
+        setFlight(res.data.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, [flightId]);
+
   const handleBooking = () => {
-    bookings.push({
-      passengerName,
-      passengerEmail,
-      flightId: flight.id,
-      flightInfo: `${flight.from} ➔ ${flight.to} (${flight.airline})`,
-    });
-    alert("Booking successful!");
-    navigate("/bookings");
+    flightsApiService
+      .createBooking({
+        passengerName,
+        passengerEmail,
+        flightId: flight.id,
+        flightInfo: `${flight.from} ➔ ${flight.to} (${flight.airline_name})`,
+      })
+      .then(() => {
+        alert("Booking successful!");
+        navigate("/bookings");
+      })
+      .catch((err) => {
+        alert("Failed to create booking: " + err.message);
+      });
   };
 
+  if (loading) return <p>Loading flight details...</p>;
+  if (error) return <p className="text-red-600">{error}</p>;
   if (!flight) return <p className="text-red-600">Flight not found</p>;
 
   return (
@@ -36,7 +60,7 @@ const BookingPage = () => {
         <p className="mb-2">
           {flight.from} ➔ {flight.to}
         </p>
-        <p className="text-green-600 font-semibold">Rp{flight.price.toLocaleString()}</p>
+        <p className="text-green-600 font-semibold">Rp{flight.price?.toLocaleString() || "N/A"}</p>
       </div>
 
       <div className="mt-4 flex flex-col gap-2">

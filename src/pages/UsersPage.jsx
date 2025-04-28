@@ -1,8 +1,26 @@
-import { users } from "../data/dummy";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { usersApiService } from "../services/api";
 
 function UsersPage() {
   const [search, setSearch] = useState("");
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    usersApiService
+      .getAll()
+      .then((res) => {
+        if (!res.data) throw new Error("Failed to fetch users");
+        setUsers(res.data.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
+
   const filteredUsers = users.filter((user) => user.name.toLowerCase().includes(search.toLowerCase()) || user.email.toLowerCase().includes(search.toLowerCase()));
 
   return (
@@ -15,7 +33,13 @@ function UsersPage() {
         <input type="text" placeholder="Search users..." className="border border-gray-300 p-4 w-full rounded-full" onChange={(e) => setSearch(e.target.value)} />
       </div>
 
-      {filteredUsers.length === 0 ? (
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        </div>
+      ) : error ? (
+        <p className="text-red-600">Error: {error}</p>
+      ) : filteredUsers.length === 0 ? (
         <p>No users found.</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -26,7 +50,6 @@ function UsersPage() {
                   <p className="font-bold text-lg">{user.name}</p>
                   <p className="text-gray-600">{user.email}</p>
                 </div>
-                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${user.role === "Admin" ? "bg-blue-100 text-blue-800" : "bg-green-100 text-green-800"}`}>{user.role}</span>
               </div>
             </div>
           ))}

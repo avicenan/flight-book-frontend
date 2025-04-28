@@ -44,7 +44,12 @@ function HomePage() {
         <p className="absolute top-1 p-4 font-bold left-1 text-3xl">Flight Ticket Point of Sales</p>
       </div>
 
-      <h1 className={`text-2xl font-bold`}>Available Flights</h1>
+      <div className="flex justify-between items-center">
+        <h1 className={`text-2xl font-bold`}>Available Flights</h1>
+        <Link to="/add-flight">
+          <button className="border border-blue-800 text-blue-800 hover:bg-blue-600 hover:text-white py-2 px-4 rounded">Add Flight</button>
+        </Link>
+      </div>
 
       {/* search box */}
       <div className="">
@@ -52,7 +57,9 @@ function HomePage() {
       </div>
 
       {loading ? (
-        <div>Loading flights...</div>
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        </div>
       ) : error ? (
         <div className="text-red-500">Error: {error}</div>
       ) : (
