@@ -38,6 +38,23 @@ function HomePage() {
     });
   }
 
+  const formatDateTime = (dateTimeString) => {
+    if (!dateTimeString) return "N/A";
+    try {
+      const date = new Date(dateTimeString);
+      return date.toLocaleString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "Invalid date";
+    }
+  };
+
   return (
     <div className="p-8 pt-20 flex flex-col min-h-screen text-left gap-4">
       <div className="jumbotron relative">
@@ -79,7 +96,10 @@ function HomePage() {
                   Route: {flight.from} → {flight.to}
                 </p>
                 <p className="font-bold mt-2">Price: Rp {flight.price ? flight.price.toLocaleString() : "N/A"}</p>
-                <p className="font-bold mt-2">Departure Time: {flight.departure_time}</p>
+                <div className="flex gap-4">
+                  <p className="font-bold mt-2">Departure Time: {formatDateTime(flight.departure_time)}</p>
+                  <p className="font-bold mt-2">Arrival Time: {formatDateTime(flight.arrival_time)}</p>
+                </div>
               </div>
 
               <Link to={`/book/${flight.id}`}>

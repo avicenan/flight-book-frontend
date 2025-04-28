@@ -129,8 +129,8 @@ const BookingsPage = () => {
                   <p className="text-gray-600">
                     Route: {booking.flight?.from || "N/A"} → {booking.flight?.to || "N/A"}
                   </p>
-                  <p className="text-gray-600">Departure Time: {booking.flight?.departure_time.toLocaleString()}</p>
-                  {booking.flight?.arrival_time && <p className="text-gray-600">Arrival Time: {booking.flight?.arrival_time.toLocaleString()}</p>}
+                  <p className="text-gray-600">Departure Time: {formatDateTime(booking.flight?.departure_time)}</p>
+                  <p className="text-gray-600">Arrival Time: {formatDateTime(booking.flight?.arrival_time)}</p>
                   <div className="flex gap-2">
                     <p className="text-sm mt-2">Tickets: {booking.ticket_quantity || 0}</p>
                     <p className="text-sm mt-2">Total Price: Rp {booking.ticket_quantity * booking.flight?.price || 0}</p>

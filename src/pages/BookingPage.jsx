@@ -39,6 +39,23 @@ const BookingPage = () => {
       });
   }, [flightId]);
 
+  const formatDateTime = (dateTimeString) => {
+    if (!dateTimeString) return "N/A";
+    try {
+      const date = new Date(dateTimeString);
+      return date.toLocaleString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "Invalid date";
+    }
+  };
+
   const handleBooking = () => {
     if (!userId) {
       alert("Please select a user");
@@ -81,8 +98,8 @@ const BookingPage = () => {
         <p className="mb-2">
           {flight.from} ➔ {flight.to}
         </p>
-        <p className="text-green-600 font-semibold mb-3">Departure: {formatDateTime(flight.departure_time)}</p>
-        {flight.arrival_time && <p className="text-green-600 font-semibold mb-3">Arrival: {formatDateTime(flight.arrival_time)}</p>}
+        <p className="text-green-600 font-semibold mb-3">Departure Time: {formatDateTime(flight.departure_time)}</p>
+        {flight.arrival_time && <p className="text-green-600 font-semibold mb-3">Arrival Time: {formatDateTime(flight.arrival_time)}</p>}
         <p className="text-lg font-semibold">Price: {flight.price ? `Rp${flight.price.toLocaleString()}` : "N/A"}</p>
       </div>
 

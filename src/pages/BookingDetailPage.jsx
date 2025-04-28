@@ -1,12 +1,13 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { bookingsApiService, flightsApiService } from "../services/api";
+import { bookingsApiService, flightsApiService, usersApiService } from "../services/api";
 
 function BookingDetailPage() {
   const { bookingId } = useParams();
   const navigate = useNavigate();
   const [booking, setBooking] = useState(null);
   const [flight, setFlight] = useState(null);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -14,10 +15,13 @@ function BookingDetailPage() {
     const fetchBooking = async () => {
       try {
         const response = await bookingsApiService.getById(bookingId);
-        setBooking(response.data);
-        const flightResponse = await flightsApiService.getById(response.data.flight_id);
-        setFlight(flightResponse.data);
+        setBooking(response.data.data);
+        const flightResponse = await flightsApiService.getById(response.data.data.flight_id);
+        setFlight(flightResponse.data.data);
         setLoading(false);
+        const userResponse = await usersApiService.getById(response.data.data.user_id);
+        // console.log(userResponse.data.data.email, "INII BANG");
+        setUser(userResponse.data.data);
       } catch (err) {
         setError("Failed to fetch booking details");
         setLoading(false);
@@ -45,24 +49,8 @@ function BookingDetailPage() {
         return "bg-green-100 text-green-800";
       case "pending":
         return "bg-yellow-100 text-yellow-800";
-      case "cancelled":
-        return "bg-red-100 text-red-800";
       default:
         return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const handleCancelBooking = async () => {
-    if (window.confirm("Are you sure you want to cancel this booking?")) {
-      try {
-        await bookingsApiService.cancel(bookingId);
-        // Refresh the booking data
-        const response = await bookingsApiService.getById(bookingId);
-        setBooking(response.data);
-      } catch (err) {
-        setError("Failed to cancel booking");
-        console.error(err);
-      }
     }
   };
 
@@ -88,17 +76,19 @@ function BookingDetailPage() {
   return (
     <div className="p-8 pt-20">
       <div className="">
+        <button className="mb-2 bg-white border border-gray-300 text-black px-4 py-2 rounded hover:bg-gray-200" onClick={() => navigate("/bookings")}>
+          Back
+        </button>
         <h1 className="text-2xl font-bold mb-6">Booking Details</h1>
-
         <div className="bg-white rounded-lg shadow-lg p-6 border border-gray-400">
           <div className="mb-6">
             <h2 className="text-xl font-semibold mb-2">Passenger Information</h2>
             <div className="space-y-2">
               <p>
-                <span className="font-medium">Name:</span> {booking.user?.name}
+                <span className="font-medium">Name:</span> {user?.name}
               </p>
               <p>
-                <span className="font-medium">Email:</span> {booking.user?.email}
+                <span className="font-medium">Email:</span> {user?.email}
               </p>
             </div>
           </div>
@@ -119,7 +109,10 @@ function BookingDetailPage() {
                 <span className="font-medium">Departure Time:</span> {formatDateTime(flight.departure_time)}
               </p>
               <p>
-                <span className="font-medium">Price:</span> Rp {flight.price?.toLocaleString()}
+                <span className="font-medium">Departure Time:</span> {formatDateTime(flight.arrival_time)}
+              </p>
+              <p>
+                <span className="font-medium">Price:</span> Rp {flight.price ? flight.price?.toLocaleString() : 0}
               </p>
               <p>
                 <span className="font-medium">Tickets:</span> {booking.ticket_quantity}
@@ -146,11 +139,6 @@ function BookingDetailPage() {
             <button className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded hover:cursor-pointer" onClick={() => window.print()}>
               Print Ticket
             </button>
-            {booking.status !== "cancelled" && (
-              <button className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded" onClick={handleCancelBooking}>
-                Cancel Booking
-              </button>
-            )}
           </div>
         </div>
       </div>
